@@ -1,7 +1,13 @@
+// mod list
+
 fn main() {
     println!("Hello, world!");
 }
 
+
+struct BinaryTree<I: PartialOrd> {
+    head: Option<BinaryTreeNode<I>>,
+}
 
 struct BinaryTreeNode<I: PartialOrd> {
     data: I,
@@ -18,35 +24,41 @@ impl<I: PartialOrd> BinaryTreeNode<I> {
     }
 
     pub fn insert(&mut self, item: I) {
-        if item < self.data {
-            if let Some(t) = &mut self.left {
-                t.insert(item);
-            } else {
-                self.left = Some(Box::new(BinaryTreeNode::new(item)));
-            }
-        } else {
-            if let Some(t) = &mut self.right {
-                t.insert(item);
-            } else {
-                self.right = Some(Box::new(BinaryTreeNode::new(item)));
+        match self.data.partial_cmp(&item) {
+            None => panic!("what"),
+            Some(std::cmp::Ordering::Equal | std::cmp::Ordering::Greater) => {
+                if let Some(t) = &mut self.right {
+                    t.insert(item);
+                } else {
+                    self.right = Some(Box::new(BinaryTreeNode::new(item)));
+                }
+            },
+            Some(std::cmp::Ordering::Less) => {
+                if let Some(t) = &mut self.left {
+                    t.insert(item);
+                } else {
+                    self.left = Some(Box::new(BinaryTreeNode::new(item)));;
+                }
             }
         }
     }
 
-    pub fn get_mut(&mut self, cmp: I) -> Option<&mut I> {
+    pub fn get_mut(&mut self, cmp: I) -> Option<&mut Self> {
         match self.data.partial_cmp(&cmp) {
             None => None,
-            Some(std::cmp::Ordering::Equal) => Some(&mut self.data),
+            Some(std::cmp::Ordering::Equal) => Some(self),
             Some(std::cmp::Ordering::Greater) => self.right.as_mut().map(|t| t.get_mut(cmp)).flatten(),
             Some(std::cmp::Ordering::Less) => self.left.as_mut().map(|t| t.get_mut(cmp)).flatten(),
         }
     }
 
-    pub fn remove(&mut self, item: I) {
-        // Find the parent of the node to be removed
-        // Take ownership and split off the child tree
-        // Modify child tree with node-to-be-removed at the root
-        // Reattach child tree to parent
-        
+    /// Must take ownership of self because the root node may be removed
+    pub fn remove(mut self, item: I) -> Option<Self> {
+        // get node to be removed
+        // if it has two or one children, 
+
+        let Some(mut to_remove) = self.get_mut(item) else { return Some(self) };
+
+        None
     }
 }
